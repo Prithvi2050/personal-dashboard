@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Dashboard
 
-## Getting Started
+A personal web application that brings nutrition tracking, automated spending analysis, and a concise daily news briefing into one calm workspace.
 
-First, run the development server:
+## MVP
+
+- **Home:** yesterday's nutrition and spending snapshot, today's briefing, and one insight
+- **Nutrition:** meal logging, calibrated utensils, calories/macros, and seven-day history
+- **Spending:** approved financial-email ingestion, categorization, corrections, and six-month analytics
+- **Briefing:** five Business, five Technology, and five Finance stories with source links
+- **Settings:** goals, integrations, trusted sources, foods, and utensils
+
+Sprint 0 contains only the project foundation and placeholder routes. It intentionally has no database, authentication, AI, Gmail, news integration, jobs, or polished product UI.
+
+## Stack
+
+- Next.js and React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Lucide React
+- PostgreSQL and external integrations in later sprints
+
+## Local development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Quality checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+```
 
-## Learn More
+## Routes
 
-To learn more about Next.js, take a look at the following resources:
+- `/` — Home
+- `/nutrition`
+- `/spending`
+- `/briefing`
+- `/settings`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Specification
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The implementation handoff is in the adjacent workspace folder `outputs/personal-dashboard-spec`. The documents used for this repository are indexed in `docs/spec/README.md`.
