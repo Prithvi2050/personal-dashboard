@@ -19,7 +19,7 @@ Sprint 0 contains only the project foundation and placeholder routes. It intenti
 - Tailwind CSS
 - shadcn/ui
 - Lucide React
-- PostgreSQL and external integrations in later sprints
+- Supabase PostgreSQL and Google authentication
 
 ## Local development
 
@@ -49,3 +49,7 @@ pnpm build
 ## Specification
 
 The implementation handoff is in the adjacent workspace folder `outputs/personal-dashboard-spec`. The documents used for this repository are indexed in `docs/spec/README.md`.
+
+## Authentication and database setup
+
+Sprint 2 uses Supabase for PostgreSQL and Google sign-in. Follow `docs/setup/supabase.md` to create the external project, apply the migration, and add local credentials. Until those values are configured, the dashboard remains available in setup-preview mode and `/sign-in` explains what is missing.
