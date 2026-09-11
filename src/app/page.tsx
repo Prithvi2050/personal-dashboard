@@ -3,6 +3,7 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OnboardingReminder } from "@/components/settings/onboarding-reminder";
 
 const stories = {
   Business: ["Markets weigh the week ahead", "Global firms reset growth plans"],
@@ -13,6 +14,7 @@ const stories = {
 export default function Home() {
   return (
     <div className="space-y-8">
+      <OnboardingReminder />
       <PageHeader eyebrow="Tuesday, 9 September" title="Good morning" description="Your completed day at a glance." />
 
       <section aria-label="Yesterday's summary" className="grid gap-4 md:grid-cols-2">
