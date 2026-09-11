@@ -57,3 +57,5 @@ The implementation handoff is in the adjacent workspace folder `outputs/personal
 Sprint 2 uses Supabase for PostgreSQL and Google sign-in. Follow `docs/setup/supabase.md` to create the external project, apply the migration, and add local credentials. Protected routes require sign-in; `/sign-in` explains missing configuration.
 
 For Sprint 3, apply the additional migration and follow the verification steps in [the settings setup guide](docs/setup/sprint-3.md). No remote migrations are run automatically.
+
+Sprint 4 adds a daily Nutrition journal with saved goals, timezone-aware date navigation, and an explicit sample-meal preview. No new migration is required. See [Sprint 4 behavior and checks](docs/setup/sprint-4.md). Real meal logging and persistent meal history remain later-sprint work.
