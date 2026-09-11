@@ -10,7 +10,7 @@ A personal web application that brings nutrition tracking, automated spending an
 - **Briefing:** five Business, five Technology, and five Finance stories with source links
 - **Settings:** goals, integrations, trusted sources, foods, and utensils
 
-Sprint 0 contains only the project foundation and placeholder routes. It intentionally has no database, authentication, AI, Gmail, news integration, jobs, or polished product UI.
+Sprints 0–2 provide the app shell and Supabase Google authentication. Sprint 3 adds saved preferences and optional onboarding. Dashboard metrics remain demonstration data until their later feature sprints.
 
 ## Stack
 
@@ -35,6 +35,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ```bash
 pnpm lint
 pnpm typecheck
+pnpm test
 pnpm build
 ```
 
@@ -45,6 +46,7 @@ pnpm build
 - `/spending`
 - `/briefing`
 - `/settings`
+- `/onboarding` — optional first-time setup
 
 ## Specification
 
@@ -52,4 +54,6 @@ The implementation handoff is in the adjacent workspace folder `outputs/personal
 
 ## Authentication and database setup
 
-Sprint 2 uses Supabase for PostgreSQL and Google sign-in. Follow `docs/setup/supabase.md` to create the external project, apply the migration, and add local credentials. Until those values are configured, the dashboard remains available in setup-preview mode and `/sign-in` explains what is missing.
+Sprint 2 uses Supabase for PostgreSQL and Google sign-in. Follow `docs/setup/supabase.md` to create the external project, apply the migration, and add local credentials. Protected routes require sign-in; `/sign-in` explains missing configuration.
+
+For Sprint 3, apply the additional migration and follow the verification steps in [the settings setup guide](docs/setup/sprint-3.md). No remote migrations are run automatically.

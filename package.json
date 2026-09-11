@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/lib/auth/paths.test.mjs src/lib/supabase/config.test.mjs"
+    "test": "node --experimental-strip-types --test src/lib/auth/paths.test.mjs src/lib/supabase/config.test.mjs src/lib/settings/validation.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
