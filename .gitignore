@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/.pnpm-store
+/node_modules.codex-backup
 /.pnp
 .pnp.*
 .yarn/*

@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/lib/auth/paths.test.mjs src/lib/supabase/config.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.116.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "lucide-react": "^1.42.0",
