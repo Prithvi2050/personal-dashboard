@@ -1,44 +1,60 @@
 # Supabase and Google sign-in setup
 
-Sprint 2 includes the application integration, but live sign-in requires a personal Supabase project and Google OAuth credentials.
+Sprint 2 contains the local integration and SQL migration. Live authentication still requires manual configuration in your own Supabase and Google projects. No remote migration is applied by this repository change.
 
-## 1. Create the Supabase project
+## 1. Create and configure Supabase
 
-Create a project at Supabase and copy its Project URL and publishable key into `.env.local`:
+Create a Supabase project. Copy `.env.example` to `.env.local`, then replace only these placeholders with values from **Project Settings → API**:
 
 ```dotenv
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR-PUBLISHABLE-KEY
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT-REF.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
 DEFAULT_TIMEZONE=Asia/Kolkata
 ```
 
-Never put a service-role key in a `NEXT_PUBLIC_` variable.
+The URL and publishable key are designed for browser use and are protected by row-level security. Never put a service-role key or Google client secret in a `NEXT_PUBLIC_` variable, source file, or committed environment file.
 
-## 2. Apply the migration
+Restart the development server whenever environment values change.
 
-Open the Supabase SQL editor and run `supabase/migrations/202609100001_create_users.sql`. This creates the application user profile, row-level security policies, and Auth synchronization trigger.
+## 2. Review and apply the migration manually
 
-## 3. Configure Google
+Review `supabase/migrations/202609100001_create_users.sql`. When ready, open the Supabase SQL editor, paste the migration, and run it once against the intended project. This creates:
 
-In Google Auth Platform, create a Web application OAuth client. Add the callback URL displayed in Supabase's Google provider settings, normally:
+- `public.users`, linked one-to-one to `auth.users`;
+- `public.user_settings`, linked one-to-one to `public.users`;
+- ownership-only RLS policies for both tables; and
+- a trigger that creates or synchronizes the application records after an Auth user is created or updated.
 
-```text
-https://YOUR-PROJECT.supabase.co/auth/v1/callback
-```
+The migration also backfills both tables for Auth users that already exist. Do not use a service-role client in the application to bypass these policies.
 
-Add `http://localhost:3000` as an authorized JavaScript origin. In Supabase **Authentication → Providers → Google**, enable Google and enter the client ID and secret.
+## 3. Create the Google OAuth client
 
-## 4. Configure redirects
+In Google Auth Platform, configure the consent screen for basic identity, then create an **OAuth client ID → Web application**. Add:
 
-In Supabase **Authentication → URL Configuration** set:
+- Authorized JavaScript origin: `http://localhost:3000`
+- Authorized redirect URI: `https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback`
+
+Use the exact callback URL shown in Supabase if it differs. The Google client ID and secret belong in Supabase's provider configuration, not in browser code. This flow requests only Google identity information used by Supabase Auth; it does not request Gmail scopes or grant inbox access.
+
+## 4. Enable Google in Supabase
+
+In **Authentication → Sign In / Providers → Google**, enable the provider and enter the Google client ID and secret.
+
+In **Authentication → URL Configuration**, set:
 
 - Site URL: `http://localhost:3000`
 - Redirect URL: `http://localhost:3000/auth/callback`
 
-Add the production URL later when deployment begins.
+Add the deployed application URL and callback later, when deployment begins.
 
-## 5. Test
+## 5. Verify locally
 
-Restart `pnpm dev`, visit `/sign-in`, and continue with Google. After sign-in, verify that a row exists in `public.users` and its timezone is `Asia/Kolkata`.
+Run `pnpm dev`, open `http://localhost:3000/sign-in`, and continue with Google. Confirm that:
 
-Application sign-in does not grant Gmail access. That remains a separate later-sprint permission.
+1. Google returns to `/auth/callback` and the app opens Home.
+2. Refreshing a protected route preserves the session.
+3. A row with the Auth user ID exists in both `public.users` and `public.user_settings`.
+4. Signing out returns to `/sign-in` and protected routes redirect there.
+5. A signed-in user cannot select or update another user's profile or settings row.
+
+If sign-in reports a redirect mismatch, compare all callback URLs character-for-character and ensure the development server was restarted after changing `.env.local`.

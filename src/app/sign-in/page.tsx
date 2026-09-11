@@ -1,15 +1,12 @@
 import { Activity, DatabaseZap } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { getSupabaseConfig } from "@/lib/supabase/config";
-
-function safeNext(value: string | string[] | undefined) {
-  const candidate = Array.isArray(value) ? value[0] : value;
-  return candidate?.startsWith("/") && !candidate.startsWith("//") ? candidate : "/";
-}
+import { safeNextPath } from "@/lib/auth/paths";
 
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
   const config = getSupabaseConfig();
-  const next = safeNext((await searchParams).next);
+  const nextValue = (await searchParams).next;
+  const next = safeNextPath(Array.isArray(nextValue) ? nextValue[0] : nextValue);
 
   return (
     <main className="mx-auto grid min-h-[calc(100vh-8rem)] w-full max-w-5xl place-items-center px-5 py-12">

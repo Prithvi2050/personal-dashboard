@@ -1,13 +1,20 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
+import { isPublicAuthPath, SIGN_IN_PATH } from "@/lib/auth/paths";
 import type { Database } from "@/types/database";
-
-const PUBLIC_PATHS = ["/sign-in", "/auth/callback", "/auth/auth-code-error"];
 
 export async function updateSession(request: NextRequest) {
   const config = getSupabaseConfig();
-  if (!config) return NextResponse.next({ request });
+  const isPublicPath = isPublicAuthPath(request.nextUrl.pathname);
+  if (!config) {
+    if (isPublicPath) return NextResponse.next({ request });
+    const signInUrl = request.nextUrl.clone();
+    signInUrl.pathname = SIGN_IN_PATH;
+    signInUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+    signInUrl.searchParams.set("reason", "configuration");
+    return NextResponse.redirect(signInUrl);
+  }
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient<Database>(config.url, config.publishableKey, {
@@ -22,15 +29,13 @@ export async function updateSession(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  const isPublicPath = PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path));
-
   if (!user && !isPublicPath) {
     const signInUrl = request.nextUrl.clone();
-    signInUrl.pathname = "/sign-in";
+    signInUrl.pathname = SIGN_IN_PATH;
     signInUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
   }
 
-  if (user && request.nextUrl.pathname === "/sign-in") return NextResponse.redirect(new URL("/", request.url));
+  if (user && request.nextUrl.pathname === SIGN_IN_PATH) return NextResponse.redirect(new URL("/", request.url));
   return response;
 }
