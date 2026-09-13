@@ -21,7 +21,7 @@ export async function PreferencesPage({ onboarding = false }: { onboarding?: boo
       <div className="mt-4 grid gap-5 text-sm leading-6 text-muted-foreground sm:grid-cols-3">
         <div><h3 className="font-semibold text-foreground">Email connection</h3><p>Not connected. Gmail access will be available separately and will require your consent.</p></div>
         <div><h3 className="font-semibold text-foreground">Morning briefing</h3><p>Business, Technology, and Finance are the default categories. Source selection is coming later.</p></div>
-        <div><h3 className="font-semibold text-foreground">Foods & utensils</h3><p>Add your personal foods and kitchenware when meal logging becomes available.</p></div>
+        <div><h3 className="font-semibold text-foreground">Foods & utensils</h3><p>Save your foods, kitchenware, and calibrated serving weights.</p><Link href="/settings/library" className="font-semibold text-primary underline underline-offset-4">Open personal library</Link></div>
       </div>
     </section>
     {!onboarding ? <Link href="/" className="inline-block rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-primary">Back to Home</Link> : null}
