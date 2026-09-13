@@ -59,3 +59,9 @@ Sprint 2 uses Supabase for PostgreSQL and Google sign-in. Follow `docs/setup/sup
 For Sprint 3, apply the additional migration and follow the verification steps in [the settings setup guide](docs/setup/sprint-3.md). No remote migrations are run automatically.
 
 Sprint 4 adds a daily Nutrition journal with saved goals, timezone-aware date navigation, and an explicit sample-meal preview. No new migration is required. See [Sprint 4 behavior and checks](docs/setup/sprint-4.md). Real meal logging and persistent meal history remain later-sprint work.
+
+Sprint 5 adds the private food/utensil library at /settings/library, reference photo uploads, and food-specific full-serving weights. Apply its migration before use; see [Sprint 5 setup and acceptance checks](docs/setup/sprint-5.md).
+
+The food library now supports USDA search and one-click saving with automatic per-100-g calories/macros. Add a server-only `USDA_API_KEY` and follow [food search setup and checks](docs/setup/food-search.md). Food search itself needs no additional migration. Utensil photos, dimensions, and food-specific calibrations are preserved.
+
+Sprint 6 adds real quick meal logging and saved daily Nutrition totals. Choose saved foods, calibrated utensil fractions or exact quantities, review, and save. Apply the new quick-meals migration before opening Nutrition; see [Sprint 6 setup and acceptance checks](docs/setup/sprint-6.md). Existing utensil photos/calibrations are preserved. Photo analysis remains Sprint 7; Home snapshots and advanced history remain later work.

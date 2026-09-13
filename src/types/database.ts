@@ -1,8 +1,16 @@
+import type { Food, Utensil, Calibration } from "@/lib/library/model";
+import type { StoredMeal, StoredMealItem, QuickItem } from "@/lib/nutrition/quick-meal";
 type NullableNumber = number | null;
+type LibraryTable<T extends { id: string; created_at: string }> = { Row: T; Insert: Omit<T, "id" | "created_at"> & { id?: string; created_at?: string }; Update: Partial<Omit<T, "id" | "created_at">>; Relationships: [] };
 
 export type Database = {
   public: {
     Tables: {
+      meals: LibraryTable<StoredMeal>;
+      meal_items: LibraryTable<StoredMealItem>;
+      foods: LibraryTable<Food>;
+      utensils: LibraryTable<Utensil>;
+      utensil_food_profiles: { Row: Calibration; Insert: Calibration; Update: Partial<Calibration>; Relationships: [] };
       users: {
         Row: { id: string; email: string; name: string | null; timezone: string; created_at: string };
         Insert: { id: string; email: string; name?: string | null; timezone?: string; created_at?: string };
@@ -17,7 +25,10 @@ export type Database = {
       };
     };
     Views: Record<never, never>;
-    Functions: { save_user_settings: { Args: { p_calories: number; p_protein: number; p_carbs: NullableNumber; p_fat: NullableNumber; p_budget: number; p_timezone: string }; Returns: undefined } };
+    Functions: {
+      save_quick_meal: { Args: { p_request_id: string; p_meal_type: string; p_items: QuickItem[] }; Returns: string };
+      save_user_settings: { Args: { p_calories: number; p_protein: number; p_carbs: NullableNumber; p_fat: NullableNumber; p_budget: number; p_timezone: string }; Returns: undefined }
+    };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };
