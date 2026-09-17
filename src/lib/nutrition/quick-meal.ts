@@ -40,5 +40,5 @@ export function calculatePortion(food: Food, item: QuickItem, calibrations: Cali
   return { quantity, calories: scaled(food.calories), protein: scaled(food.protein), carbs: scaled(food.carbs), fat: scaled(food.fat) };
 }
 
-export type StoredMeal = { id: string; user_id: string; request_id: string; meal_type: string; meal_time: string; total_calories: number; total_protein: number; total_carbs: number; total_fat: number; created_at: string };
+export type StoredMeal = { id: string; user_id: string; request_id: string; meal_type: string; meal_time: string; total_calories: number; total_protein: number; total_carbs: number; total_fat: number; created_at: string; photo_path?: string | null; photo_draft_id?: string | null };
 export type StoredMealItem = { id: string; user_id: string; meal_id: string; food_id: string; utensil_id: string | null; food_name: string; source: string; serving_basis: string; serving_quantity: number; quantity: number; portion_fraction: number | null; utensil_name: string | null; full_serving_grams: number | null; calories: number; protein: number; carbs: number; fat: number; user_confirmed: boolean; position: number; created_at: string };

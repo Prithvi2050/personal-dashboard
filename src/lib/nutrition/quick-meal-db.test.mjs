@@ -29,6 +29,8 @@ test("quick-meal migration and owner-isolated atomic persistence in local Postgr
       create function storage.foldername(text) returns text[] language sql immutable as 'select string_to_array($1, ''/'')';`);
     await db.exec(await readFile(new URL("../../../supabase/migrations/202609110002_foods_utensils.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../../../supabase/migrations/202609120001_quick_meals.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../../../supabase/migrations/202609130001_photo_meals.sql", import.meta.url), "utf8"));
+    await db.exec("grant usage on schema storage to authenticated; grant select,insert on storage.objects to authenticated");
     await db.query("insert into public.users(id) values ($1), ($2)", [owner, other]);
     for (const [id, user] of [[foodId, owner], [otherFoodId, other]]) await db.query("insert into public.foods(id,user_id,name,serving_basis,serving_quantity,calories,protein,carbs,fat,source) values($1,$2,'Synthetic food','g',100,200,10,30,4,'Synthetic test source')", [id, user]);
     for (const [id, user] of [[utensilId, owner], [otherUtensilId, other]]) await db.query("insert into public.utensils(id,user_id,name,type,capacity_ml,reference_image_path) values($1,$2,'Synthetic bowl','bowl',250,$3)", [id, user, `${user}/reference.jpg`]);
@@ -77,6 +79,38 @@ test("quick-meal migration and owner-isolated atomic persistence in local Postgr
       assert.equal(await count("meals"), 1);
       await db.query("select set_config('request.jwt.claim.sub',$1,false)", [owner]);
       assert.equal(await count("meals"), 1);
+    });
+    await t.test("photo analysis claims, private uploads, review snapshots and save retries", async () => {
+      const draftId = crypto.randomUUID();
+      const claim = () => db.query("select public.claim_photo_analysis($1,'test-model',$2::uuid[]) as claimed", [draftId, [utensilId]]);
+      assert.equal((await claim()).rows[0].claimed, true);
+      assert.equal((await claim()).rows[0].claimed, false);
+      await assert.rejects(db.query("select public.claim_photo_analysis($1,'test-model',$2::uuid[])", [crypto.randomUUID(), [otherUtensilId]]));
+      const result = { items: [{ name: "Synthetic detection", food_id: foodId, utensil_id: utensilId, confidence: 0.4, quantity: 90, fraction: 0.5, note: "Uncertain" }], warning: "Test" };
+      await db.query("insert into storage.objects(id,bucket_id,name) values($1,'meal-images',$2)", [crypto.randomUUID(), `${owner}/${draftId}.jpg`]);
+      await assert.rejects(db.query("insert into storage.objects(id,bucket_id,name) values($1,'meal-images',$2)", [crypto.randomUUID(), `${other}/${draftId}.jpg`]));
+      await db.query("update public.photo_drafts set status='ready',result=$1::jsonb where id=$2", [JSON.stringify(result), draftId]);
+      const changed = await db.query("update public.photo_drafts set result='{}' where id=$1 returning id", [draftId]);
+      assert.equal(changed.rows.length, 0);
+      const reviewed = { ...exact, quantity: 25, source_index: 0, reviewed: true };
+      const confirm = items => db.query("select public.save_photo_meal($1,'Lunch',$2::jsonb) as id", [draftId, JSON.stringify(items)]);
+      await assert.rejects(confirm([{ ...reviewed, reviewed: false }]));
+      await assert.rejects(confirm([{ ...reviewed, source_index: 19 }]));
+      await assert.rejects(confirm([reviewed, { ...reviewed, food_id: otherFoodId }]));
+      assert.equal(await count("meals"), 1);
+      const savedId = (await confirm([reviewed])).rows[0].id;
+      assert.equal((await confirm([reviewed])).rows[0].id, savedId);
+      assert.equal(await count("meals"), 2);
+      const saved = (await db.query("select * from public.meal_items where meal_id=$1", [savedId])).rows[0];
+      assert.equal(Number(saved.quantity), 25); assert.equal(Number(saved.calories), 125);
+      assert.equal(saved.ai_detection.quantity, 90); assert.equal(saved.ai_detection.confidence, 0.4);
+      await db.query("select set_config('request.jwt.claim.sub',$1,false)", [other]);
+      assert.equal(await count("photo_drafts"), 0);
+      assert.equal((await db.query("select * from storage.objects where bucket_id='meal-images'")).rows.length, 0);
+      await assert.rejects(confirm([reviewed]));
+      await db.query("select set_config('request.jwt.claim.sub',$1,false)", [owner]);
+      for (let i=1;i<20;i++) await db.query("select public.claim_photo_analysis($1,'test-model','{}'::uuid[])", [crypto.randomUUID()]);
+      await assert.rejects(db.query("select public.claim_photo_analysis($1,'test-model','{}'::uuid[])", [crypto.randomUUID()]), /Daily analysis limit/);
     });
     await t.test("signed-out users cannot execute the write function or read tables", async () => {
       await db.query("select set_config('request.jwt.claim.sub','',false)");

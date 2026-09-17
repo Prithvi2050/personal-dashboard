@@ -2,7 +2,15 @@ export const mealTypes = ["Breakfast", "Lunch", "Snack", "Dinner", "Other"] as c
 export type MealType = typeof mealTypes[number];
 export type Macros = { calories: number; protein: number; carbs: number; fat: number };
 export type MealItem = Macros & { name: string; portion: string };
-export type Meal = { id: string; type: MealType; time: string; items: MealItem[] };
+export type Meal = { id: string; type: MealType; time: string; items: MealItem[]; imageUrl?: string | null; hasPhoto?: boolean };
+export type NutritionDay = { day: string; meals: Meal[] };
+export function summarizeHistory(history: NutritionDay[]) {
+  const days = history.map(({ day, meals }) => ({ day, mealCount: meals.length, totals: totalMacros(meals.flatMap(meal => meal.items)) }));
+  const totals = totalMacros(history.flatMap(day => day.meals.flatMap(meal => meal.items)));
+  const loggedDays = days.filter(day => day.mealCount > 0).length;
+  const average = loggedDays ? Object.fromEntries(Object.entries(totals).map(([key, value]) => [key, Math.round(value / loggedDays * 10) / 10])) as Macros : null;
+  return { days, totals, loggedDays, average };
+}
 
 export function localDate(now: Date, timezone: string): string {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
