@@ -1,6 +1,37 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { localDate, recentDays, selectedDay, totalMacros, goalProgress, groupMeals } from "./daily.ts";
+import { localDate, recentDays, selectedDay, totalMacros, goalProgress, groupMeals, summarizeHistory } from "./daily.ts";
+
+test("weekly totals sum saved items; averages exclude unlogged days", () => {
+  const item = {name:"Synthetic food",portion:"50 g",calories:125,protein:5,carbs:20,fat:2.5};
+  const days = recentDays("2026-09-16");
+  const history = days.map((day,index) => ({day,meals:index < 2 ? [{id:day,type:"Lunch",time:"12:00",items:[item,item]}] : []}));
+  const before = JSON.stringify(history);
+  const result = summarizeHistory(history);
+  assert.equal(result.loggedDays,2);
+  assert.equal(result.days.length,7);
+  assert.deepEqual(result.totals,{calories:500,protein:20,carbs:80,fat:10});
+  assert.deepEqual(result.average,{calories:250,protein:10,carbs:40,fat:5});
+  assert.equal(result.days[2].mealCount,0);
+  assert.equal(JSON.stringify(history),before);
+});
+test("empty history has no average; logged zero is distinct from an unlogged day", () => {
+  assert.equal(summarizeHistory([]).average,null);
+  assert.equal(summarizeHistory([{day:"2026-09-16",meals:[]}]).average,null);
+  const result = summarizeHistory([{day:"2026-09-16",meals:[{id:"zero",type:"Other",time:"12:00",items:[{name:"Water",portion:"1",calories:0,protein:0,carbs:0,fat:0}]}]}]);
+  assert.equal(result.loggedDays,1);
+  assert.equal(result.average.calories,0);
+});
+test("weekly decimal sums round once across items", () => {
+  const result = summarizeHistory([1,2,3].map(n => ({day:`2026-09-${n+10}`,meals:[{id:String(n),type:"Other",time:"12:00",items:[{calories:0.14,protein:0.14,carbs:0.14,fat:0.14}]}]})));
+  assert.equal(result.totals.calories,0.4);
+  assert.equal(result.average.calories,0.1);
+});
+test("DST repeated hours and extreme offsets keep the correct local calendar date", () => {
+  assert.equal(localDate(new Date("2026-11-01T05:30:00Z"),"America/New_York"),"2026-11-01");
+  assert.equal(localDate(new Date("2026-11-01T06:30:00Z"),"America/New_York"),"2026-11-01");
+  assert.equal(localDate(new Date("2026-09-16T11:00:00Z"),"Pacific/Kiritimati"),"2026-09-17");
+});
 test("today follows the user's timezone on either side of midnight", () => {
   const now = new Date("2026-09-11T20:00:00Z");
   assert.equal(localDate(now, "Asia/Kolkata"), "2026-09-12");

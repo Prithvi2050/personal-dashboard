@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { localDate, mealTypes, type Meal, type MealType } from "@/lib/nutrition/daily";
 import { parseMealInput, MealValidationError, type QuickMealState } from "@/lib/nutrition/quick-meal";
 
-export async function loadMeals(day: string, timezone: string): Promise<Meal[]> {
+export async function loadMeals(day: string, timezone: string, includePhotos = true): Promise<Meal[]> {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("Sign in required");
@@ -18,7 +18,12 @@ export async function loadMeals(day: string, timezone: string): Promise<Meal[]> 
   if (!meals.length) return [];
   const { data: items, error: itemError, count: itemCount } = await supabase.from("meal_items").select("*", { count: "exact" }).eq("user_id", user.id).in("meal_id", meals.map(meal => meal.id)).order("position");
   if (itemError || itemCount !== items.length) throw new Error("Meal items unavailable or truncated");
+  const photos = new Map(await Promise.all(meals.filter(meal => includePhotos && meal.photo_path).map(async meal => {
+    const signed = await supabase.storage.from("meal-images").createSignedUrl(meal.photo_path!, 900);
+    return [meal.id, signed.data?.signedUrl ?? null] as const;
+  })));
   return meals.map(meal => ({
+    imageUrl: photos.get(meal.id), hasPhoto: Boolean(meal.photo_path),
     id: meal.id, type: mealTypes.includes(meal.meal_type as MealType) ? meal.meal_type as MealType : "Other",
     time: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(meal.meal_time)),
     items: items.filter(item => item.meal_id === meal.id).map(item => ({

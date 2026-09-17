@@ -1,5 +1,7 @@
 # Personal Dashboard
 
+Sprint 8 adds a seven-day nutrition overview with logged totals, averages and current-goal context. No additional migration is required. See [Sprint 8 setup and weighed-meal QA](docs/setup/sprint-8.md) for acceptance checks and remaining real-world validation.
+
 A personal web application that brings nutrition tracking, automated spending analysis, and a concise daily news briefing into one calm workspace.
 
 ## MVP
@@ -65,3 +67,5 @@ Sprint 5 adds the private food/utensil library at /settings/library, reference p
 The food library now supports USDA search and one-click saving with automatic per-100-g calories/macros. Add a server-only `USDA_API_KEY` and follow [food search setup and checks](docs/setup/food-search.md). Food search itself needs no additional migration. Utensil photos, dimensions, and food-specific calibrations are preserved.
 
 Sprint 6 adds real quick meal logging and saved daily Nutrition totals. Choose saved foods, calibrated utensil fractions or exact quantities, review, and save. Apply the new quick-meals migration before opening Nutrition; see [Sprint 6 setup and acceptance checks](docs/setup/sprint-6.md). Existing utensil photos/calibrations are preserved. Photo analysis remains Sprint 7; Home snapshots and advanced history remain later work.
+
+Sprint 7 adds private meal-photo upload, OpenAI food/portion suggestions using selected utensil references, confidence-aware review, and atomic confirmed saving. It requires its migration plus server-only OpenAI configuration; follow [Sprint 7 setup](docs/setup/sprint-7.md). Quick logging remains available. Live photo accuracy and end-to-end behavior require manual acceptance after setup.

@@ -1,8 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { Camera, Flame, Drumstick, Salad, Droplets, Utensils } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Progress } from "@/components/ui/progress";
+import { NutritionHistory } from "@/components/nutrition/history-view";
+import type { NutritionDay } from "@/lib/nutrition/daily";
 import { dayLabel, goalProgress, groupMeals, totalMacros, type Meal, type Macros } from "@/lib/nutrition/daily";
 
 const metrics = [
@@ -13,7 +16,8 @@ const metrics = [
 ] as const;
 const format = (value: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 1 }).format(value);
 
-export function DailyNutritionView({ day, days, timezone, meals, goals, demo, quickLog }: {
+export function DailyNutritionView({ day, days, timezone, meals, goals, demo, quickLog, history }: {
+  history: NutritionDay[];
   day: string; days: string[]; timezone: string; meals: Meal[];
   goals: Record<keyof Macros, number | null>; demo: boolean; quickLog?: ReactNode;
 }) {
@@ -40,6 +44,8 @@ export function DailyNutritionView({ day, days, timezone, meals, goals, demo, qu
       })}
     </section>
     <Link href="/settings/library" className="inline-block rounded-full border border-border px-5 py-3 text-sm font-semibold text-primary focus-visible:outline-2 focus-visible:outline-primary">Manage foods & utensils</Link>
+    {!demo ? <Link href="/nutrition/photo" className="ml-3 inline-block rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">Log meal with a photo</Link> : null}
+    <NutritionHistory history={history} goals={goals} selected={day} demo={demo} />
     {!demo ? quickLog : null}
     <section aria-labelledby="meal-history-heading" className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="meal-history-heading" className="text-2xl font-bold">{demo ? "Sample meals" : "Meals"} · {dayLabel(day, days[0])}</h2><p className="text-sm text-muted-foreground">{meals.length} {meals.length === 1 ? "meal" : "meals"}</p></div>
@@ -47,11 +53,11 @@ export function DailyNutritionView({ day, days, timezone, meals, goals, demo, qu
         groupMeals(meals).filter((group) => group.meals.length).map((group) => <section key={group.type} aria-label={group.type} className="space-y-3"><h3 className="text-sm font-bold text-muted-foreground">{group.type}</h3>{group.meals.map((meal) => {
           const total = totalMacros(meal.items);
           return <article key={meal.id} className="rounded-2xl bg-card p-5 ring-1 ring-border/80">
-            <div className="flex items-start gap-4"><div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-muted" aria-label="No meal photo"><Utensils aria-hidden="true" className="size-5 text-muted-foreground" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><h4 className="font-semibold">{meal.items.map((item) => item.name).join(", ")}</h4><time dateTime={day + "T" + meal.time} className="text-sm text-muted-foreground">{meal.time}</time></div><p className="mt-2 text-sm text-muted-foreground">{format(total.calories)} kcal · {format(total.protein)} g protein · {format(total.carbs)} g carbs · {format(total.fat)} g fat</p></div></div>
+            <div className="flex items-start gap-4">{meal.imageUrl ? <Image unoptimized src={meal.imageUrl} width={56} height={56} alt="Saved meal photo" className="size-14 shrink-0 rounded-2xl object-cover"/> : <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-muted" aria-label={meal.hasPhoto ? "Photo temporarily unavailable" : "No meal photo"}><Utensils aria-hidden="true" className="size-5 text-muted-foreground" /></div>}<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><h4 className="font-semibold">{meal.items.map((item) => item.name).join(", ")}</h4><time dateTime={day + "T" + meal.time} className="text-sm text-muted-foreground">{meal.time}</time></div><p className="mt-2 text-sm text-muted-foreground">{format(total.calories)} kcal · {format(total.protein)} g protein · {format(total.carbs)} g carbs · {format(total.fat)} g fat</p></div></div>
             <details className="mt-4 border-t border-border pt-4"><summary className="cursor-pointer rounded text-sm font-semibold text-primary focus-visible:outline-2 focus-visible:outline-primary">Food and portion details</summary><ul className="mt-4 space-y-3">{meal.items.map((item, index) => <li key={index} className="flex flex-col justify-between gap-1 text-sm sm:flex-row"><span>{item.name} <span className="text-muted-foreground">· {item.portion}</span></span><span className="text-muted-foreground">{format(item.calories)} kcal · P {format(item.protein)} g · C {format(item.carbs)} g · F {format(item.fat)} g</span></li>)}</ul></details>
           </article>;
         })}</section>)}
     </section>
-    <div className="flex items-start gap-3 rounded-2xl bg-muted/60 p-5 text-sm leading-6 text-muted-foreground"><Camera aria-hidden="true" className="mt-1 size-5 shrink-0" /><p>Photo-based meal analysis arrives in Sprint 7. Your utensil reference photos and dimensions remain saved for that step. Update goals in <Link href="/settings" className="font-semibold text-primary underline">Settings</Link>.</p></div>
+    <div className="flex items-start gap-3 rounded-2xl bg-muted/60 p-5 text-sm leading-6 text-muted-foreground"><Camera aria-hidden="true" className="mt-1 size-5 shrink-0" /><p>Photo analysis suggests foods and portions using selected utensil references. Review the estimates before saving; quick logging remains available. Update goals in <Link href="/settings" className="font-semibold text-primary underline">Settings</Link>.</p></div>
   </div>;
 }
