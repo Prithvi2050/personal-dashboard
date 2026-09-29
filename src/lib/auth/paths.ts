@@ -4,6 +4,7 @@ export const AUTH_CODE_ERROR_PATH = "/auth/auth-code-error";
 export const AUTH_SIGN_OUT_PATH = "/auth/sign-out";
 
 const PUBLIC_PATHS = [
+  "/settings/gmail/callback", // Handles missing sessions itself without retaining OAuth query parameters in sign-in URLs.
   SIGN_IN_PATH,
   AUTH_CALLBACK_PATH,
   AUTH_CODE_ERROR_PATH,

@@ -1,5 +1,9 @@
 # Personal Dashboard
 
+Spending now supports a shared two-member household, multi-PDF upload, combined review/confirmation, calendar-month expenses, and audited corrections. Initial parsers cover SBI bank, SBI Card and Axis Card; PDFs are not permanently stored. Apply the new migration and follow [household statement setup](docs/setup/household-statements.md). HDFC/ICICI support is pending samples. The synthetic sandbox remains separate; Gmail is optional/deferred.
+
+Sprint 9 adds a separate Gmail connection, approved sender controls and a manual metadata-only connection check. It does not yet import transactions. Follow [Sprint 9 setup](docs/setup/sprint-9.md) for the new migration, separate Google Cloud project and encrypted-token configuration. Existing Google sign-in is unchanged.
+
 Sprint 8 adds a seven-day nutrition overview with logged totals, averages and current-goal context. No additional migration is required. See [Sprint 8 setup and weighed-meal QA](docs/setup/sprint-8.md) for acceptance checks and remaining real-world validation.
 
 A personal web application that brings nutrition tracking, automated spending analysis, and a concise daily news briefing into one calm workspace.
@@ -46,6 +50,7 @@ pnpm build
 - `/` — Home
 - `/nutrition`
 - `/spending`
+- `/spending/review` — Sprint 10 synthetic transaction sandbox (not real spending)
 - `/briefing`
 - `/settings`
 - `/onboarding` — optional first-time setup
@@ -55,6 +60,8 @@ pnpm build
 The implementation handoff is in the adjacent workspace folder `outputs/personal-dashboard-spec`. The documents used for this repository are indexed in `docs/spec/README.md`.
 
 ## Authentication and database setup
+
+Sprint 10 adds fixture-only transaction extraction, duplicate prevention, merchant rules and corrections. Apply its migration manually and follow [Sprint 10 setup and acceptance checks](docs/setup/sprint-10.md). It makes no Gmail/AI calls; the deferred Gmail connection issue is not resolved by this sprint. Real Spending dashboard integration remains Sprint 11.
 
 Sprint 2 uses Supabase for PostgreSQL and Google sign-in. Follow `docs/setup/supabase.md` to create the external project, apply the migration, and add local credentials. Protected routes require sign-in; `/sign-in` explains missing configuration.
 
