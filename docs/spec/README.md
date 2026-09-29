@@ -19,3 +19,5 @@ Sprint 0 establishes the repository only. No application functionality should be
 For statement-based household spending, also read [the September 2026 decision](../decisions/2026-09-household-statements.md). The user's approved shared PDF-upload/EMI/retention decisions supersede the original Gmail-first, individual-only spending assumptions.
 
 The September 25 debit-only and unified-category update is scoped in [Sprint 11](../setup/sprint-11.md). It supersedes earlier credit-review and net-of-refund spending behavior.
+
+The user's India/global mix and the news-foundation boundaries are recorded in [Sprint 12](../setup/sprint-12.md). Source selection is opt-in; collection is manual and metadata-only until later sprints.

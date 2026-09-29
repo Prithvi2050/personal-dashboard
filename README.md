@@ -1,5 +1,7 @@
 # Personal Dashboard
 
+Sprint 12 adds opt-in India/global news sources and a manual, metadata-only Briefing inbox. Apply the new migration and follow [Sprint 12 setup](docs/setup/sprint-12.md). This is not yet the curated, summarized daily briefing; that remains Sprint 13.
+
 Spending now supports a shared two-member household, multi-PDF upload, combined review/confirmation, calendar-month expenses, and audited corrections. Initial parsers cover SBI bank, SBI Card and Axis Card; PDFs are not permanently stored. Apply the new migration and follow [household statement setup](docs/setup/household-statements.md). HDFC/ICICI support is pending samples. The synthetic sandbox remains separate; Gmail is optional/deferred.
 
 Sprint 9 adds a separate Gmail connection, approved sender controls and a manual metadata-only connection check. It does not yet import transactions. Follow [Sprint 9 setup](docs/setup/sprint-9.md) for the new migration, separate Google Cloud project and encrypted-token configuration. Existing Google sign-in is unchanged.
