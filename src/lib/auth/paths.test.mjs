@@ -6,6 +6,9 @@ test("recognizes only public authentication routes", () => {
   assert.equal(isPublicAuthPath("/sign-in"), true);
   assert.equal(isPublicAuthPath("/auth/callback"), true);
   assert.equal(isPublicAuthPath("/nutrition"), false);
+  assert.equal(isPublicAuthPath("/settings/gmail"), false);
+  assert.equal(isPublicAuthPath("/settings/gmail/callback"), true);
+  assert.equal(isPublicAuthPath("/settings/gmail/callback-evil"), false);
 });
 
 test("accepts local return paths and rejects external redirects", () => {

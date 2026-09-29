@@ -1,0 +1,54 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+import { prepareFixtures,fixtureEmails,followupFixtures,fixtureSender } from './model.ts';
+test('actual Sprint 10 migration enforces idempotency, correction history, rules and ownership',async()=>{
+ const db=new PGlite();
+ const owner='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222';
+ try {
+  await db.exec(`create role anon; create role authenticated; create schema auth;
+   create function auth.uid() returns uuid language sql stable as 'select nullif(current_setting(''request.jwt.claim.sub'',true),'''')::uuid';
+   grant usage on schema auth to authenticated,anon; create table public.users(id uuid primary key);`);
+  await db.exec(await readFile(new URL('../../../supabase/migrations/202609180001_fixture_transactions.sql',import.meta.url),'utf8'));
+  await db.query('insert into public.users values($1),($2)',[owner,other]);
+  await db.exec('set role authenticated');
+  const asUser=id=>db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);
+  const importRows=async items=>(await db.query('select public.import_fixture_transactions($1::jsonb) as added',[JSON.stringify(items)])).rows[0].added;
+  const correct=(id,revision,save=true,account='Card 1234')=>db.query("select public.correct_fixture_transaction($1,$2,'My Cafe','Travel','2026-09-18T03:00:00Z',$3,'Corrected fixture',$4)",[id,revision,account,save]);
+  const items=(await prepareFixtures(fixtureEmails,[fixtureSender])).items;
+  await asUser(owner);
+  assert.equal(await importRows(items),3); assert.equal(await importRows(items),0);
+  const row=(await db.query("select * from public.transactions where email_message_id='fixture:card-001'")).rows[0];
+  await correct(row.id,0);
+  await assert.rejects(correct(row.id,0),/Stale revision/);
+  await assert.rejects(correct(row.id,1,true,'1234567890'));
+  assert.equal(await importRows(items),0);
+  const updated=(await db.query('select * from public.transactions where id=$1',[row.id])).rows[0];
+  assert.equal(updated.normalized_merchant,'My Cafe'); assert.equal(updated.category,'Travel'); assert.equal(updated.revision,1);
+  assert.deepEqual(updated.original,row.original);
+  assert.equal((await db.query('select * from public.transaction_corrections')).rows.length,1);
+  const next=(await prepareFixtures(followupFixtures,[fixtureSender])).items;
+  assert.equal(await importRows(next),1);
+  const following=(await db.query("select * from public.transactions where email_message_id='fixture:card-002'")).rows[0];
+  assert.equal(following.category,'Travel'); assert.equal(following.classification_source,'rule');
+  await assert.rejects(importRows([{...items[0],email_message_id:'fixture:new'}, {...items[0],email_message_id:'fixture:bad',amount_minor:-1}]));
+  assert.equal((await db.query("select * from public.transactions where email_message_id='fixture:new'")).rows.length,0);
+  await assert.rejects(importRows([{...items[0],email_message_id:'real-message'}]));
+  await assert.rejects(importRows([{...items[0],email_message_id:'fixture:bad-sender',sender_email:'real@example.com'}]));
+  await assert.rejects(db.query("update public.transactions set category='Other'"),/permission denied/);
+  await assert.rejects(db.query('delete from public.transaction_corrections'),/permission denied/);
+  await asUser(other);
+  for(const table of ['transactions','merchant_rules','transaction_corrections']) assert.equal((await db.query(`select * from public.${table}`)).rows.length,0);
+  await assert.rejects(correct(row.id,1),/unavailable/);
+  await assert.rejects(db.query("select public.remove_fixture_rule('sample cafe')"),/unavailable/);
+  assert.equal(await importRows(items),3); // same message IDs are allowed for a different owner
+  await asUser(owner); await db.query("select public.remove_fixture_rule('sample cafe')");
+  assert.equal((await db.query('select * from public.merchant_rules')).rows.length,0);
+  assert.equal((await db.query('select category from public.transactions where id=$1',[row.id])).rows[0].category,'Travel');
+  await asUser(''); await assert.rejects(importRows(items),/Sign in/);
+  await db.exec('reset role; set role anon');
+  await assert.rejects(importRows(items),/permission denied/);
+  await assert.rejects(db.query('select * from public.transactions'),/permission denied/);
+ } finally {await db.close();}
+});

@@ -15,3 +15,7 @@ Read these documents before implementing later sprints:
 9. `09-decisions-risks-and-open-questions.md`
 
 Sprint 0 establishes the repository only. No application functionality should be inferred from the placeholder pages.
+
+For statement-based household spending, also read [the September 2026 decision](../decisions/2026-09-household-statements.md). The user's approved shared PDF-upload/EMI/retention decisions supersede the original Gmail-first, individual-only spending assumptions.
+
+The September 25 debit-only and unified-category update is scoped in [Sprint 11](../setup/sprint-11.md). It supersedes earlier credit-review and net-of-refund spending behavior.
