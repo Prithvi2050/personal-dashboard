@@ -20,7 +20,7 @@ export async function PreferencesPage({ onboarding = false }: { onboarding?: boo
       <h2 id="coming-later" className="text-lg font-bold">The rest can wait</h2>
       <div className="mt-4 grid gap-5 text-sm leading-6 text-muted-foreground sm:grid-cols-3">
         <div><h3 className="font-semibold text-foreground">Email connection</h3><p>Optional Gmail permission is separate from dashboard login.</p><Link href="/settings/gmail" className="font-semibold text-primary underline underline-offset-4">Manage Gmail & approved senders</Link></div>
-        <div><h3 className="font-semibold text-foreground">Morning briefing</h3><p>Business, Technology, and Finance are the default categories. Source selection is coming later.</p></div>
+        <div><h3 className="font-semibold text-foreground">Morning briefing</h3><p>Choose India and global sources for Business, Technology and Finance.</p><Link href="/settings/news" className="font-semibold text-primary underline underline-offset-4">Manage news sources</Link></div>
         <div><h3 className="font-semibold text-foreground">Foods & utensils</h3><p>Save your foods, kitchenware, and calibrated serving weights.</p><Link href="/settings/library" className="font-semibold text-primary underline underline-offset-4">Open personal library</Link></div>
       </div>
     </section>

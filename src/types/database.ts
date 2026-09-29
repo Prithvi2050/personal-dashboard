@@ -4,12 +4,16 @@ import type { PhotoDraft, ReviewedItem } from "@/lib/nutrition/photo-model";
 import type { Sender } from "@/lib/gmail/core";
 import type { Candidate, Transaction, MerchantRule } from "@/lib/spending/model";
 import type { Account, Member, Draft, Entry, ParsedStatement, ReviewChoice } from "@/lib/statements/model";
+import type { NewsSource, NewsPreference, NewsArticle, ArticleCandidate } from "@/lib/news/model";
 type NullableNumber = number | null;
 type LibraryTable<T extends { id: string; created_at: string }> = { Row: T; Insert: Omit<T, "id" | "created_at"> & { id?: string; created_at?: string }; Update: Partial<Omit<T, "id" | "created_at">>; Relationships: [] };
 
 export type Database = {
   public: {
     Tables: {
+      news_sources: { Row: Omit<NewsSource,"article_hosts">; Insert: never; Update: never; Relationships: [] };
+      user_news_sources: { Row: NewsPreference; Insert: never; Update: never; Relationships: [] };
+      news_articles: { Row: NewsArticle; Insert: never; Update: never; Relationships: [] };
       spending_households: { Row: { id: string; owner_id: string; created_at: string }; Insert: never; Update: never; Relationships: [] };
       spending_members: { Row: Member; Insert: never; Update: never; Relationships: [] };
       spending_invites: { Row: { household_id: string; email: string; expires_at: string }; Insert: never; Update: never; Relationships: [] };
@@ -42,6 +46,9 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      set_news_source: { Args: { p_source:string; p_enabled:boolean }; Returns: undefined };
+      claim_news_source: { Args: { p_source:string }; Returns: string | null };
+      finish_news_source: { Args: { p_source:string; p_request:string; p_items:ArticleCandidate[]; p_failed:boolean; p_skipped:number }; Returns: number };
       manage_spending_household: { Args: { p_operation: string; p_value: string }; Returns: string };
       add_spending_account: { Args: { p_label: string; p_format: string; p_last_four: string; p_owner: string }; Returns: string };
       stage_statement_files: { Args: { p_files: ParsedStatement[] }; Returns: string };
